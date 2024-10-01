@@ -1,17 +1,3 @@
-# ICOS-Cities - Eddy Covariance
-
-Internal documentation and planning of the H2020 Project ICOS Cities Task 3.4 (Eddy Covariance)
-
-## Current issues
-
-Check out current issues on data flow, logger program and processing:
-
-https://github.com/envmet/ICOS-Cities/issues/
-
-Check out the project board for current issues and tasks related to implementation:
-
-https://github.com/envmet/ICOS-Cities/projects/1
-
 ## Documentation of ICOS-Cities CR6 Logger and Program
 
 The program `ICOSCitiesV###.cr6` is a universal logger program for the Campbell Scientific [CR6 data logger](https://www.campbellsci.com/cr6), where `###` is its three digit version number. We call it "universal" program because the same program can be run in Zurich, Paris and Munich with and without IOP instruments attached. In all cases the program is recording the raw 20 Hz data of the `IRGASON`, and while the intensive observations are conducted also controls the valves and the ICOS relaxed eddy accumulation sampler built by MPI Jena (implemented) and records the REA runs. In addition, an optional small all-in-one weather sensor can be recorded to provide uninterrupted data on wind, temperature / humidity, radiation, pressure etc.
