@@ -1,0 +1,632 @@
+'CR6 Datalogger Program
+'ICOS Cities
+'Date: April 26, 2022
+'Program authors: 
+' Andreas Christen andreas.christen(at)meteo.uni-freiburg.de
+' Joshua Hashemi joshua.hashemi(at)meteo.uni-freiburg.de
+' Stavros Stagakis stavros.stagakis(at)unibas.ch
+'
+'Wiring
+'ClimaVue50 (optional)
+'U11 - (white) ClimaVue50 Signal 
+'|||- = (clear) ClimaVue50 Shield  
+'G = (black) ClimaVue50 Power Ground 
+'12V = (brown) ClimaVue50 Power 12V 
+
+'=====================================================================
+'Declare Constants
+'=====================================================================
+
+'Define internet communication settings
+Const SYS_NTP_Server_IP = "192.168.1.1" 'NTP from router
+Const SYS_FTP_ServerIP = "132.230.103.24"  'FTP at Univeristy of Freiburg for data transmission
+Const SYS_FTP_User = "datagate7"           
+Const SYS_FTP_Password = "handsaw-talon-movable-haziness-unleash-buckle"
+Const SYS_Offset_from_UTC = 0
+
+'Define SDM and SDI-12 communication settings
+Const SYS_EC100_SDMAddress = 1 ' SDM Address of IRGASON EC100
+Const SYS_CD8S_SDMAddress = 2  ' SDM Address of CD8S Relay Controller
+Const SYS_SDM_BitPeriod = 28.8 ' Possibly to be changed based on cable length
+Const SYS_CV50_SDI12Port = U11 ' Port on which a ClimaVue50 is optionally connected over SDI-12
+
+'Define instrument and output settings 
+Const SYS_OutputRate = 20 'Hz of fast data tables
+Const SYS_MovingBlockDuration = 1800 ' Number of seconds to average running mean and standard deviation of vertical wind
+Const SYS_EC100_Bandwidth = 10 'Hz bandwith, should be 1/2 output rate
+Const SYS_REA_Sampler_Voltage_Threshold = 1500 ' If voltage drops below this value for 50 msec the run will stop (too indicate buffers are full).
+Const SYS_IRGASON_Azimuth = 270.0 ' Provide here Azimuth of IRGASON's y-axis relative to North (i.e. if head points to N = 0, E = 90, S = 180, W = 270
+Const SYS_CV50_Azimuth = 90.0 'The Climavue N is facing E
+Const SYS_ClimaVue50_Enable As Boolean = TRUE 'Set to TRUE if a ClimaVue50 is attached (conditional compile)
+
+'Define physical universal constants
+Const SYS_UnivGasConstant = 8.3144598  'J mol-1 K-1 
+Const SYS_UnivGasConstant2 = 0.0000820575  'm3 atm K−1 mol−1
+Const SYS_MolarMassAir = 28.96 'g mol-1 for dry air
+Const SYS_MolarMassWater = 18.015 'g mol-1 
+Const SYS_MolarMassCO2 = 44.009 'g mol-1 
+Const SYS_GasConstantWater = 1000*SYS_UnivGasConstant/SYS_MolarMassWater 'J kg-1 K-1
+Const SYS_GasConstantAir = 1000*SYS_UnivGasConstant/SYS_MolarMassAir 'J kg-1 K-1
+
+' Provide output of trigonometric functions in degrees
+AngleDegrees 
+
+'=====================================================================
+'Declare Variables
+'=====================================================================
+
+'Declare Public Variables
+
+'directly polled, instantaneous IRGASON variables
+Public RAW_IRGASON(12)
+Alias RAW_IRGASON(1) = RAW_IRGASON_Ux : Units RAW_IRGASON_Ux = m/s
+Alias RAW_IRGASON(2) = RAW_IRGASON_Uy : Units RAW_IRGASON_Uy = m/s
+Alias RAW_IRGASON(3) = RAW_IRGASON_Uz : Units RAW_IRGASON_Uz = m/s
+Alias RAW_IRGASON(4) = RAW_IRGASON_Ts : Units RAW_IRGASON_Ts = degC
+Alias RAW_IRGASON(5) = RAW_IRGASON_DiagSonic : Units RAW_IRGASON_DiagSonic = arb 
+Alias RAW_IRGASON(6) = RAW_IRGASON_CO2 : Units RAW_IRGASON_CO2 = mg/m^3 
+Alias RAW_IRGASON(7) = RAW_IRGASON_H2O : Units RAW_IRGASON_H2O = g/m^3 
+Alias RAW_IRGASON(8) = RAW_IRGASON_DiagIRGA : Units RAW_IRGASON_DiagIRGA = arb 
+Alias RAW_IRGASON(9) = RAW_IRGASON_CellT : Units RAW_IRGASON_CellT = degC
+Alias RAW_IRGASON(10) = RAW_IRGASON_CellPrs : Units RAW_IRGASON_CellPrs = kPa 
+Alias RAW_IRGASON(11) = RAW_IRGASON_CO2SigStrgth : Units RAW_IRGASON_CO2SigStrgth = arb
+Alias RAW_IRGASON(12) = RAW_IRGASON_H2OSigStrgth : Units RAW_IRGASON_H2OSigStrgth = arb
+'Derived instantaneous CO2 dry mole fraction 
+Public RAW_IRGASON_CO2Dry : Units RAW_IRGASON_CO2Dry = ppm
+
+' Derived instantaneous IRGASON variables (not stored high frequency)
+Public RAW_IRGASON_Uz_SqDeparture : Units RAW_IRGASON_Uz_SqDeparture = m2/s2
+Public RAW_IRGASON_HorWindVel_ms : Units RAW_IRGASON_HorWindVel_ms = m/s
+Public RAW_IRGASON_HorWindDir_degN : Units RAW_IRGASON_HorWindDir_degN = degN
+Public RAW_IRGASON_WindInclination_deg : Units RAW_IRGASON_WindInclination_deg = degN
+
+
+' Aggregated IRGASON variables
+Public AGG_IRGASON_Uz_RunAvg : Units AGG_IRGASON_Uz_RunAvg = m2/s2
+Public AGG_IRGASON_Uz_RunSqDeparture : Units AGG_IRGASON_Uz_RunSqDeparture = m2/s2
+Public AGG_IRGASON_Uz_Stddev : Units AGG_IRGASON_Uz_Stddev = m/s
+
+' System operation variables
+Public SYS_BattVolt : Units SYS_BattVolt = V
+Public SYS_PanelTemp : Units SYS_PanelTemp = degC
+Public SYS_FTPresult(2) As Long
+Public SYS_DateStamp As String * 10
+Public SYS_TimeStamp As String * 5
+Public SYS_CD16_Output(16) ' all should be set to zero
+Dim SYS_EC100_Result
+Dim SYS_TimeOffset
+Dim SYS_StoreRun
+
+' Relaxed eddy accumulation variables
+'Define editable relaxed eddy accumulation settings (to be set by user)
+Public REA_DeadBandWidth = 0.0
+Public REA_Active '0 = REA inactive, 1 = REA active
+Public REA_Manual_OpenValves '0 = REA controled by vertical wind, 1 = REA manually controlled for testing
+
+'Define programmatic relaxed eddy accumulation variables (should not be edited by user) 
+Public REA_PreviousActive 'REA State in previous step 0 = REA inactive, 1 = REA active
+Public REA_Sampler_Active '0 = ICOS sampler inactive, 1 = ICOS sampler active
+Public REA_Sampler_PreviousActive '0 = ICOS sampler in previous step inactive, 1 = ICOS sampler in prev. step active
+Public REA_Sampler_Active_Voltage : Units REA_Sampler_Active_Voltage = mV
+Public REA_PreviousReservoir 'Current reservoir 0 = No reservoir (deadband), 1 = up reservoir, 2 = downwind reservoir, 3 = both reservoir (manual mode only)
+Public REA_CurrentReservoir 'Reservoir in previous step, 0 = No reservoir (deadband), 1 = up reservoir, 2 = downwind reservoir
+Public REA_Flag ' AB = Switched from A -> B, 00, 01, 02, 10, 11, 12, 20, 21, 22
+Public REA_Run_Start As String * 22
+Public REA_Run_Stop As String * 22
+Public REA_Run_TimeUp : Units REA_Run_TimeUp = sec
+Public REA_Run_TimeDown : Units REA_Run_TimeDown = sec
+Public REA_Run_SwitchesUp : Units REA_Run_SwitchesUp = count
+Public REA_Run_SwitchesDown : Units REA_Run_SwitchesDown = count
+Public REA_Run_CO2AvgUp : Units REA_Run_CO2AvgUp = mg/m^3
+Public REA_Run_CO2AvgDown : Units REA_Run_CO2AvgDown = mg/m^3
+Public REA_Run_CO2DryAvgUp : Units REA_Run_CO2DryAvgUp = ppm
+Public REA_Run_CO2DryAvgDown : Units REA_Run_CO2DryAvgDown = ppm
+Public REA_Run_H2OAvgUp : Units REA_Run_H2OAvgUp = g/m^3
+Public REA_Run_H2OAvgDown : Units REA_Run_H2OAvgDown = g/m^3
+Public REA_Run_PressureAvgUp : Units REA_Run_PressureAvgUp = kPa
+Public REA_Run_PressureAvgDown : Units REA_Run_PressureAvgDown = kPa
+Public REA_Run_TempAvgUp : Units REA_Run_TempAvgUp = degC
+Public REA_Run_TempAvgDown : Units REA_Run_TempAvgDown = degC
+
+'Meteorology variables through ClimaVue50
+#If (SYS_ClimaVue50_Enable) Then ' ClimaVue50 raw data
+  Public RAW_CV50_Data(14)
+  Alias RAW_CV50_Data(1)=RAW_CV50_GHI_Wm2 : Units RAW_CV50_GHI_Wm2 = W/m2
+  Alias RAW_CV50_Data(2)=RAW_CV50_Precipitation_mm : Units RAW_CV50_Precipitation_mm = mm
+  Alias RAW_CV50_Data(3)=RAW_CV50_LtngStrikes_cnt : Units RAW_CV50_LtngStrikes_cnt = Count
+  Alias RAW_CV50_Data(4)=RAW_CV50_LtngDist_km : Units RAW_CV50_LtngDist_km = km
+  Alias RAW_CV50_Data(5)=RAW_CV50_Wind_ms : Units RAW_CV50_Wind_ms = m/s
+  Alias RAW_CV50_Data(6)=RAW_CV50_WindDirection_deg : Units RAW_CV50_WindDirection_deg = deg
+  Alias RAW_CV50_Data(7)=RAW_CV50_WindGustMax_ms : Units RAW_CV50_WindGustMax_ms = m/s
+  Alias RAW_CV50_Data(8)=RAW_CV50_AirTemperature_degC : Units RAW_CV50_AirTemperature_degC = degC
+  Alias RAW_CV50_Data(9)=RAW_CV50_VapourPressure_kPa : Units RAW_CV50_VapourPressure_kPa = kPa
+  Alias RAW_CV50_Data(10)=RAW_CV50_PressureActual_kPa : Units RAW_CV50_PressureActual_kPa = kPa
+  Alias RAW_CV50_Data(11)=RAW_CV50_RelHumidity_fractional : Units RAW_CV50_RelHumidity_fractional = fraction
+  Alias RAW_CV50_Data(12)=RAW_CV50_RHT_C : Units RAW_CV50_RHT_C = degC
+  Alias RAW_CV50_Data(13)=SYS_CV50_TiltNS_deg : Units SYS_CV50_TiltNS_deg = deg
+  Alias RAW_CV50_Data(14)=SYS_CV50_TiltWE_deg : Units SYS_CV50_TiltWE_deg = deg
+  Public RAW_CV50_Invalid_Wind As Long : Units RAW_CV50_Invalid_Wind = Count
+#EndIf
+
+#If (SYS_ClimaVue50_Enable) Then ' ClimaVue50 QC and converted data
+  Public MET_CV50_GHI_Wm2 As Float : Units MET_CV50_GHI_Wm2 = W/m2
+  Public MET_CV50_Precipitation_mm As Float : Units MET_CV50_Precipitation_mm = mm
+  Public MET_CV50_LtngStrikes_cnt As Float : Units MET_CV50_LtngStrikes_cnt = Count
+  Public MET_CV50_LtngDist_km As Float : Units MET_CV50_LtngDist_km = km
+  Public MET_CV50_Wind_ms As Float : Units MET_CV50_Wind_ms = m/s
+  Public MET_CV50_WindDirection_deg As Float : Units MET_CV50_WindDirection_deg = deg 
+  Public MET_CV50_WindGustMax_ms As Float : Units MET_CV50_WindGustMax_ms = m/s
+  Public MET_CV50_AirTemperature_degC As Float : Units MET_CV50_AirTemperature_degC = degC
+  Public MET_CV50_VapourPressure_hPa As Float : Units MET_CV50_VapourPressure_hPa = hPa
+  Public MET_CV50_PressureActual_hPa As Float : Units MET_CV50_PressureActual_hPa = hPa
+  Public MET_CV50_RelHumidity_percent As Float : Units MET_CV50_RelHumidity_percent = %
+  ' Copy wind data from previous measurement for gap filling
+  Public MET_CV50_Wind_ms_prev As Float
+  Units MET_CV50_Wind_ms_prev = m/s
+  Public MET_CV50_WindDirection_deg_prev As Float
+  Units MET_CV50_WindDirection_deg_prev = deg
+  Public MET_CV50_WindGustMax_ms_prev As Float
+  Units MET_CV50_WindGustMax_ms_prev = m/s
+  'secondary calculations from ClimaVue50 data:
+  Public MET_CV50_DewPoint_degC  As Float
+  Units MET_CV50_DewPoint_degC=degC
+  Public MET_CV50_VapPressDeficit_hPa As Float
+  Units MET_CV50_VapPressDeficit_hPa=hPa
+  Public MET_CV50_MixingRatio_gKg As Float
+  Units MET_CV50_MixingRatio_gKg=g/kg
+#EndIf
+
+#If (SYS_ClimaVue50_Enable) Then 'ClimaVue50 helper variables
+  Public MET_SaturVapPrsTd_hPa As Float : Units MET_SaturVapPrsTd_hPa=hPa
+  Public MET_SaturVapPrsTd_kPa As Float : Units MET_SaturVapPrsTd_kPa=kPa
+#EndIf
+
+'=====================================================================
+'Declare Output Data Tables
+'=====================================================================
+
+'Define High Frequency Data Tables
+DataTable (RAW_20Hz,1,-1) 'Set table size to # of records, or -1 to autoallocate.
+	DataInterval (0,1000/SYS_OutputRate,mSec,20)
+	Sample(12,RAW_IRGASON,IEEE4) ' Export all data
+	Sample (1, RAW_IRGASON_CO2Dry, IEEE4)
+	Sample(1,REA_Flag,FP2)
+	TableFile ("CRD:"+Status.SerialNumber+"_RAW_20Hz_",8,-1,0,30,Min,0,0)
+EndTable
+
+'Define Aggregated Data Table over 1 min
+DataTable (AGG_1min,1,-1) 'Set table size to # of records, or -1 to autoallocate.
+	DataInterval (0,1,min,0)
+  Average(12,RAW_IRGASON,IEEE4,0) ' Write 1 min average of all IRGASON variables
+  Average(1,RAW_IRGASON_CO2Dry,IEEE4,0)
+  Average(1,RAW_IRGASON_HorWindVel_ms,IEEE4,0) ' Scalar average horizontal wind
+  WindVector (1,RAW_IRGASON_HorWindVel_ms,RAW_IRGASON_HorWindDir_degN,IEEE4,0,0,0,1) ' Vector average horizontal wind and wind direction
+  FieldNames("RAW_IRGASON_HorWindVelVec_ms,RAW_IRGASON_HorWindDir_degN")
+  #If (SYS_ClimaVue50_Enable) Then ' Output the following fields if a ClimaVue is attached
+  	Average (1,MET_CV50_PressureActual_hPa,IEEE4,False)
+  	Average (1,MET_CV50_Wind_ms,IEEE4,False)
+  	Maximum (1,MET_CV50_WindGustMax_ms,IEEE4,False,False)
+    WindVector (1,MET_CV50_Wind_ms,MET_CV50_WindDirection_deg,IEEE4,0,0,0,1)
+    FieldNames("MET_CV50_Wind_ms_Vec,MET_CV50_WindDirection_deg_Vec")
+  	Average (1,MET_CV50_AirTemperature_degC,IEEE4,False)
+  	Average (1,MET_CV50_RelHumidity_percent,IEEE4,False)
+    Average (1,MET_CV50_DewPoint_degC,IEEE4,False)
+    Average (1,MET_CV50_VapourPressure_hPa,IEEE4,False)
+    Average (1,MET_CV50_VapPressDeficit_hPa,IEEE4,False)
+    Average (1,MET_CV50_MixingRatio_gKg,IEEE4,False)
+    Average (1,MET_CV50_GHI_Wm2,IEEE4,False)
+    Totalize (1,MET_CV50_Precipitation_mm,IEEE4,False)
+    Totalize (1,MET_CV50_LtngStrikes_cnt,IEEE4,False)
+    Average (1,MET_CV50_LtngDist_km,IEEE4,False)
+    Average (1,SYS_CV50_TiltNS_deg,IEEE4,False)
+    Average (1,SYS_CV50_TiltWE_deg,IEEE4,False)
+  #EndIf 
+  Average(1,SYS_BattVolt,FP2,0)
+  Average(1,SYS_PanelTemp,FP2,0)
+
+	TableFile ("CRD:"+Status.SerialNumber+"_AGG_1min_",8,-1,0,1440,Min,0,0)
+EndTable
+
+'Define Aggregated REA Run Statistics Table
+DataTable (REA_RunSummary,SYS_StoreRun,-1) 'Set table size to # of records, or -1 to autoallocate.
+  Sample(1,REA_Run_Start,String) 
+  Sample(1,REA_Run_Stop,String) 
+  Sample(1,REA_Run_TimeUp,IEEE4) 
+  Sample(1,REA_Run_TimeDown,IEEE4) 
+  Sample(1,REA_Run_SwitchesUp,IEEE4)
+  Sample(1,REA_Run_SwitchesDown,IEEE4)
+  Sample(1,REA_Run_CO2AvgUp,IEEE4)
+  Sample(1,REA_Run_CO2AvgDown,IEEE4)
+  Sample(1,REA_Run_CO2DryAvgUp,IEEE4)
+  Sample(1,REA_Run_CO2DryAvgDown,IEEE4)
+  Sample(1,REA_Run_H2OAvgUp,IEEE4)
+  Sample(1,REA_Run_H2OAvgDown,IEEE4)
+  Sample(1,REA_Run_PressureAvgUp,IEEE4)
+  Sample(1,REA_Run_PressureAvgDown,IEEE4)
+  Sample(1,REA_Run_TempAvgUp,IEEE4)
+  Sample(1,REA_Run_TempAvgDown,IEEE4)
+  Sample(1,REA_DeadBandWidth,IEEE4)
+  Sample(1,AGG_IRGASON_Uz_RunAvg,IEEE4)
+  Sample(1,AGG_IRGASON_Uz_Stddev,IEEE4)
+	TableFile ("CRD:"+Status.SerialNumber+"_REA_RunSummary_",8,-1,0,0,Min,0,0)
+EndTable
+
+'=====================================================================
+'Main Program (Scans)
+'=====================================================================
+
+BeginProg
+  
+  ' Initialize the system the first time program is started
+  SDMSpeed(SYS_SDM_BitPeriod)
+  NetworkTimeProtocol(SYS_NTP_Server_IP,SYS_Offset_from_UTC,50) ' Set Time when starting program
+  EC100Configure(SYS_EC100_Result, SYS_EC100_SDMAddress, 0, SYS_EC100_Bandwidth) ' Set Bandwith when starting program
+  
+  'Initialize variables
+  REA_Active = 0
+  REA_PreviousActive = 0
+  REA_Sampler_Active = 0
+  REA_Sampler_PreviousActive = 0
+  REA_PreviousReservoir = 0 
+  REA_Run_TimeUp = 0
+  REA_Run_TimeDown = 0
+  REA_Run_SwitchesUp = 0
+  REA_Run_SwitchesDown = 0
+  REA_Run_CO2AvgUp = NaN
+  REA_Run_CO2AvgDown = NaN
+  REA_Run_CO2DryAvgUp = NaN
+  REA_Run_CO2DryAvgDown = NaN
+  REA_Run_H2OAvgUp = NaN
+  REA_Run_H2OAvgDown = NaN
+  REA_Run_PressureAvgUp = NaN
+  REA_Run_PressureAvgDown = NaN
+  REA_Run_TempAvgUp = NaN
+  REA_Run_TempAvgDown = NaN
+  REA_Run_Start = ""
+  REA_Run_Stop = ""
+  
+  SDMCD16AC(SYS_CD16_Output,1,SYS_CD8S_SDMAddress) ' Set SDMCD16AC to low 
+  PortSet(U1,0) ' Communicate with REA sampler that up reservoir is off
+  PortSet(U2,0) ' Communicate with REA sampler that down reservoir is off
+  PortSet(U3,0) ' Communicate with REA sampler that no run is planned at start of program
+  
+  ' Actual Scan
+  
+	Scan (1000/SYS_OutputRate,mSec,0,0)
+	  
+		EC100(RAW_IRGASON,SYS_EC100_SDMAddress,1) 
+		
+    'Calculate horizontal wind direction
+    RAW_IRGASON_HorWindDir_degN = (360.0 + 90.0 + ATN2((-1)*RAW_IRGASON_Ux,(-1)*RAW_IRGASON_Uy) + SYS_IRGASON_Azimuth) MOD 360
+    RAW_IRGASON_HorWindVel_ms = (RAW_IRGASON_Ux^2 + RAW_IRGASON_Uy^2)^0.5 
+    RAW_IRGASON_WindInclination_deg = ATN2(RAW_IRGASON_HorWindVel_ms,RAW_IRGASON_Uz) 'Calculate vertical wind inclination
+    
+    'Calculate CO2 dry mole fraction 
+    RAW_IRGASON_CO2Dry = (((RAW_IRGASON_CO2/1000/SYS_MolarMassCO2)/((RAW_IRGASON_CellPrs*0.00986923)/(SYS_UnivGasConstant2*(RAW_IRGASON_CellT+273.15))))/(1-((RAW_IRGASON_H2O/SYS_MolarMassWater)/((RAW_IRGASON_CellPrs*0.00986923)/(SYS_UnivGasConstant2*(RAW_IRGASON_CellT+273.15))))))*1000000
+   
+    ' -----------------------------------------------------------
+		' Relaxed Eddy Accumulation code
+		' -----------------------------------------------------------
+
+		VoltDiff(REA_Sampler_Active_Voltage,1,mV5000,U7,0,0,15000,1,0) ' read sampler status from Port 1
+		If REA_Sampler_Active_Voltage > SYS_REA_Sampler_Voltage_Threshold Then 
+		 REA_Sampler_Active = 1 
+		Else 
+		 If REA_Manual_OpenValves = 0 Then REA_Sampler_Active = 0 Else REA_Sampler_Active = 1
+		EndIf 
+		
+		If (REA_Sampler_Active = 0) AND (REA_Sampler_PreviousActive = 1) Then REA_Active = 0 ' stop active REA run (e.g. sampler full)
+		
+    ' If Relaxed Eddy Accumulation is inactive
+		If (REA_Active = 0) Then
+		  
+      If REA_PreviousActive = 1 Then 
+        PortSet(U3,0) ' Communicate with sampler that run has stopped
+        REA_Run_Stop = Public.Timestamp(5,1) ' Record time of stoppingREA_Run_CO2AvgUp = SYS_OutputRate * REA_Run_CO2AvgUp / REA_Run_TimeUp
+        REA_Run_CO2AvgUp = REA_Run_CO2AvgUp / (REA_Run_TimeUp * SYS_OutputRate)
+        If REA_Run_CO2AvgUp = 0 Then REA_Run_CO2AvgUp = NaN
+        REA_Run_CO2AvgDown = REA_Run_CO2AvgDown / (REA_Run_TimeDown * SYS_OutputRate) 
+        If REA_Run_CO2AvgDown = 0 Then REA_Run_CO2AvgDown = NaN
+        REA_Run_CO2DryAvgUp = REA_Run_CO2DryAvgUp / (REA_Run_TimeUp * SYS_OutputRate)
+        If REA_Run_CO2DryAvgUp = 0 Then REA_Run_CO2DryAvgUp = NaN
+        REA_Run_CO2DryAvgDown = REA_Run_CO2DryAvgDown / (REA_Run_TimeDown * SYS_OutputRate) 
+        If REA_Run_CO2DryAvgDown = 0 Then REA_Run_CO2DryAvgDown = NaN        
+        REA_Run_H2OAvgUp = REA_Run_H2OAvgUp / (REA_Run_TimeUp * SYS_OutputRate)
+        If REA_Run_H2OAvgUp = 0 Then REA_Run_H2OAvgUp = NaN
+        REA_Run_H2OAvgDown = REA_Run_H2OAvgDown / (REA_Run_TimeDown * SYS_OutputRate)   
+        If REA_Run_H2OAvgDown = 0 Then REA_Run_H2OAvgDown = NaN 
+        REA_Run_PressureAvgUp = REA_Run_PressureAvgUp / (REA_Run_TimeUp * SYS_OutputRate)
+        If REA_Run_PressureAvgUp = 0 Then REA_Run_PressureAvgUp = NaN
+        REA_Run_PressureAvgDown = REA_Run_PressureAvgDown / (REA_Run_TimeDown * SYS_OutputRate)   
+        If REA_Run_PressureAvgDown = 0 Then REA_Run_PressureAvgDown = NaN 
+        REA_Run_TempAvgUp = REA_Run_TempAvgUp / (REA_Run_TimeUp * SYS_OutputRate)
+        If REA_Run_TempAvgUp = 0 Then REA_Run_TempAvgUp = NaN
+        REA_Run_TempAvgDown = REA_Run_TempAvgDown / (REA_Run_TimeDown * SYS_OutputRate)   
+        If REA_Run_TempAvgDown = 0 Then REA_Run_TempAvgDown = NaN 
+        SYS_StoreRun = 1 ' Save run statistics to table
+      Else
+        SYS_StoreRun = 0  
+      EndIf
+        
+      REA_CurrentReservoir = 0
+      
+      If REA_PreviousReservoir <> 0 Then
+        ' Close "both" valves
+         SYS_CD16_Output(1) = 0
+         SYS_CD16_Output(2) = 0
+         SDMCD16AC(SYS_CD16_Output,1,SYS_CD8S_SDMAddress)
+         PortSet(U1,0) ' Communicate with sampler that up reservoir is off
+         PortSet(U2,0) ' Communicate with sampler that down reservoir is off
+         REA_PreviousReservoir = 0
+      EndIf  
+      
+      ' Determine Standard Deviation of moving block to be ready for next REA run
+      AvgRun (AGG_IRGASON_Uz_RunAvg,1,RAW_IRGASON_Uz,SYS_MovingBlockDuration*SYS_OutputRate)
+      RAW_IRGASON_Uz_SqDeparture = (RAW_IRGASON_Uz - AGG_IRGASON_Uz_RunAvg)^2 ' SqDeparture = (w - w_overbar)^2 
+      AvgRun (AGG_IRGASON_Uz_RunSqDeparture,1,RAW_IRGASON_Uz_SqDeparture,SYS_MovingBlockDuration*SYS_OutputRate)
+      AGG_IRGASON_Uz_Stddev = (AGG_IRGASON_Uz_RunSqDeparture)^0.5
+      REA_Flag = -1
+      REA_PreviousActive = 0
+            
+    EndIf
+    
+    ' If Relaxed Eddy Accumulation is active
+    If (REA_Active = 1) Then 
+      If REA_PreviousActive = 0 Then ' First time new run is started
+         PortSet(U3,1) ' Communicate with sampler that new run is to start
+         REA_Run_Start = Public.Timestamp(5,1) ' Record time of starting
+         REA_Run_TimeUp = 0 ' Reset run statistics (how long up reservoir is open)
+         REA_Run_TimeDown = 0 ' Reset run statistics (how long down reservoir is open)
+         REA_Run_SwitchesUp = 0 ' Reset number of switches for up
+         REA_Run_SwitchesDown = 0 ' Reset number of switches for down
+         REA_Run_CO2AvgUp = 0 ' Reset run average concentration of CO2 for up
+         REA_Run_CO2AvgDown = 0 ' Reset run average concentration of CO2 for down
+         REA_Run_CO2DryAvgUp = 0 ' Reset run average concentration of CO2 for up
+         REA_Run_CO2DryAvgDown = 0 ' Reset run average concentration of CO2 for down
+         REA_Run_H2OAvgUp = 0 ' Reset run average concentration of H2O for up
+         REA_Run_H2OAvgDown = 0 ' Reset run average concentration of H2O for down
+         REA_Run_PressureAvgUp = 0 ' Reset run average concentration of Pressure for up
+         REA_Run_PressureAvgDown = 0 ' Reset run average concentration of Pressure for down
+         REA_Run_TempAvgUp = 0 ' Reset run average concentration of Temp for up
+         REA_Run_TempAvgDown = 0 ' Reset run average concentration of Temp for down
+      Endif   
+      If REA_Manual_OpenValves = 0 Then ' Regular REA operation - valves switch based on vertical wind and deadband 
+        If ((RAW_IRGASON_Uz-AGG_IRGASON_Uz_RunAvg) > (REA_DeadBandWidth * AGG_IRGASON_Uz_Stddev)) Then 
+          REA_CurrentReservoir = 1
+          REA_Run_TimeUp = REA_Run_TimeUp + 1/SYS_OutputRate
+          REA_Run_CO2AvgUp = REA_Run_CO2AvgUp + RAW_IRGASON_CO2 ' sum CO2 concentrations up to calculate conditional average at end of REA run
+          REA_Run_CO2DryAvgUp = REA_Run_CO2DryAvgUp + RAW_IRGASON_CO2Dry
+          REA_Run_H2OAvgUp = REA_Run_H2OAvgUp + RAW_IRGASON_H2O ' sum H2O concentrations up to calculate conditional average at end of REA run
+          REA_Run_PressureAvgUp = REA_Run_PressureAvgUp + RAW_IRGASON_CellPrs ' sum Pressure during up to calculate conditional average at end of REA run
+          REA_Run_TempAvgUp = REA_Run_TempAvgUp + RAW_IRGASON_CellT ' sum Temperature during up to calculate conditional average at end of REA run
+          If REA_PreviousReservoir <> REA_CurrentReservoir Then
+            ' Open "up" valve
+            REA_Run_SwitchesUp = REA_Run_SwitchesUp+1
+            SYS_CD16_Output(1) = 1
+            SYS_CD16_Output(2) = 0
+            SDMCD16AC(SYS_CD16_Output,1,SYS_CD8S_SDMAddress)
+            PortSet(U1,1) ' Communicate with sampler that up reservoir is on
+            PortSet(U2,0) ' Communicate with sampler that down reservoir is off
+          EndIf   
+        EndIf
+        If ((RAW_IRGASON_Uz-AGG_IRGASON_Uz_RunAvg) < (-1)*(REA_DeadBandWidth * AGG_IRGASON_Uz_Stddev)) Then 
+          REA_CurrentReservoir = 2
+          REA_Run_TimeDown = REA_Run_TimeDown + 1/SYS_OutputRate
+          REA_Run_CO2AvgDown = REA_Run_CO2AvgDown + RAW_IRGASON_CO2 ' sum CO2 concentrations down to calculate conditional average at end of REA run
+          REA_Run_CO2DryAvgDown = REA_Run_CO2DryAvgDown + RAW_IRGASON_CO2Dry         
+          REA_Run_H2OAvgDown = REA_Run_H2OAvgDown + RAW_IRGASON_H2O ' sum H2O concentrations down to calculate conditional average at end of REA run
+          REA_Run_PressureAvgDown = REA_Run_PressureAvgDown + RAW_IRGASON_CellPrs ' sum Pressure during down to calculate conditional average at end of REA run
+          REA_Run_TempAvgDown = REA_Run_TempAvgDown + RAW_IRGASON_CellT ' sum Temperature during down to calculate conditional average at end of REA run
+          If REA_PreviousReservoir <> REA_CurrentReservoir Then
+            ' Open "down" valve
+            REA_Run_SwitchesDown = REA_Run_SwitchesDown+1
+            SYS_CD16_Output(1) = 0
+            SYS_CD16_Output(2) = 1
+            SDMCD16AC(SYS_CD16_Output,1,SYS_CD8S_SDMAddress)
+            PortSet(U1,0) ' Communicate with sampler that up reservoir is off
+            PortSet(U2,1) ' Communicate with sampler that down reservoir is on
+          EndIf   
+        EndIf
+        If (ABS(RAW_IRGASON_Uz-AGG_IRGASON_Uz_RunAvg) <= (REA_DeadBandWidth * AGG_IRGASON_Uz_Stddev)) Then 
+          REA_CurrentReservoir = 0
+          If REA_PreviousReservoir <> REA_CurrentReservoir Then
+            ' Close "both" valves
+            SYS_CD16_Output(1) = 0
+            SYS_CD16_Output(2) = 0
+            SDMCD16AC(SYS_CD16_Output,1,SYS_CD8S_SDMAddress)
+            PortSet(U1,0) ' Communicate with sampler that up reservoir is off
+            PortSet(U2,0) ' Communicate with sampler that down reservoir is off
+          EndIf   
+        EndIf
+      Else ' Manually open valves and override REA switching by vertical wind
+        REA_CurrentReservoir = 3 ' 3 means that both are open at the same time
+        REA_Run_TimeUp = REA_Run_TimeUp + 1/SYS_OutputRate
+        REA_Run_TimeDown = REA_Run_TimeDown + 1/SYS_OutputRate
+        REA_Run_CO2AvgUp = REA_Run_CO2AvgUp + RAW_IRGASON_CO2 ' sum CO2 concentrations up to calculate conditional average at end of REA run
+        REA_Run_CO2DryAvgUp = REA_Run_CO2DryAvgUp + RAW_IRGASON_CO2Dry
+        REA_Run_H2OAvgUp = REA_Run_H2OAvgUp + RAW_IRGASON_H2O ' sum H2O concentrations up to calculate conditional average at end of REA run
+        REA_Run_PressureAvgUp = REA_Run_PressureAvgUp + RAW_IRGASON_CellPrs ' sum Pressure up to calculate conditional average at end of REA run
+        REA_Run_TempAvgUp = REA_Run_TempAvgUp + RAW_IRGASON_CellT ' sum Temp up to calculate conditional average at end of REA run
+        REA_Run_CO2AvgDown = REA_Run_CO2AvgDown + RAW_IRGASON_CO2 ' sum CO2 concentrations down to calculate conditional average at end of REA run
+        REA_Run_CO2DryAvgDown = REA_Run_CO2DryAvgDown+ RAW_IRGASON_CO2Dry
+        REA_Run_H2OAvgDown = REA_Run_H2OAvgDown + RAW_IRGASON_H2O ' sum H2O concentrations down to calculate conditional average at end of REA run
+        REA_Run_PressureAvgDown = REA_Run_PressureAvgDown + RAW_IRGASON_CellPrs ' sum Pressure down to calculate conditional average at end of REA run
+        REA_Run_TempAvgDown = REA_Run_TempAvgDown + RAW_IRGASON_CellT ' sum Temp down to calculate conditional average at end of REA run
+        If REA_PreviousReservoir <> REA_CurrentReservoir Then
+          REA_Run_SwitchesUp = REA_Run_SwitchesUp+1
+          REA_Run_SwitchesDown = REA_Run_SwitchesDown+1
+          SYS_CD16_Output(1) = 1
+          SYS_CD16_Output(2) = 1
+          SDMCD16AC(SYS_CD16_Output,1,SYS_CD8S_SDMAddress)
+          PortSet(U1,1) ' Communicate with sampler that up reservoir is manually on 
+          PortSet(U2,1) ' Communicate with sampler that down reservoir is manually on 
+        EndIf
+      EndIf 
+      REA_Flag = REA_PreviousReservoir*10 + REA_CurrentReservoir + REA_Sampler_Active*100
+      REA_PreviousReservoir = REA_CurrentReservoir
+      REA_PreviousActive = 1
+    EndIf
+    
+    REA_Sampler_PreviousActive = REA_Sampler_Active
+   
+    CallTable RAW_20Hz
+    CallTable AGG_1min
+    CallTable REA_RunSummary
+    
+    'Write a file mark every 30 min to the tables
+    If (IfTime(0,30,Min)) Then 
+     FileMark(RAW_20Hz)
+     FileMark(AGG_1min)
+     SYS_DateStamp = Left(Public.Timestamp(5,1),10)
+    EndIf 
+
+	NextScan
+	
+'----------------------------------------------------------------------
+' SLOW SEQUENCE #1
+' Get system parameters every minute
+'----------------------------------------------------------------------
+
+	SlowSequence
+  Scan (10,Sec,0,0)
+    If (IfTime(20,1440,Min)) Then ' Check time through NTP at 00:20 every day
+      SYS_TimeOffset = NetworkTimeProtocol(SYS_NTP_Server_IP,SYS_Offset_from_UTC,50) ' Set Time
+    EndIf
+    Battery(SYS_BattVolt)
+    PanelTemp (SYS_PanelTemp,15000)
+    
+    ' ------------------------------------------------------------
+    ' Optionally sample ClimaVue50 every 10 seconds
+    ' ------------------------------------------------------------
+
+    #If (SYS_ClimaVue50_Enable) Then
+   
+    ' Get SDI-12 data from ClimaVue50
+    SDI12Recorder(RAW_CV50_Data(),SYS_CV50_SDI12Port,"0","R7!",1,0,-1)   
+
+    ' Quality control and secondary entries for pressure
+    MET_CV50_PressureActual_hPa = RAW_CV50_PressureActual_kPa * 10 ' conversion kPa to hPa
+    If ( MET_CV50_PressureActual_hPa > 1100 ) Then MET_CV50_PressureActual_hPa = NaN
+    If ( MET_CV50_PressureActual_hPa < 500 ) Then MET_CV50_PressureActual_hPa = NaN
+    
+    ' Quality control and secondary entries for temperature and humidity
+    MET_CV50_AirTemperature_degC = RAW_CV50_AirTemperature_degC				
+    MET_CV50_RelHumidity_percent = RAW_CV50_RelHumidity_fractional * 100 'Convert fractional relative humidity into percent relative humidity
+    MET_CV50_VapourPressure_hPa = RAW_CV50_VapourPressure_kPa * 10 ' Convert from kPa to hPa
+    
+		If ( MET_CV50_AirTemperature_degC > 50 ) Then MET_CV50_AirTemperature_degC = NaN
+    If ( MET_CV50_AirTemperature_degC < -40 ) Then MET_CV50_AirTemperature_degC = NaN
+    If ( MET_CV50_RelHumidity_percent > 110 ) Then MET_CV50_RelHumidity_percent = NaN
+    If ( MET_CV50_RelHumidity_percent > 100 ) Then MET_CV50_RelHumidity_percent = 100
+    If ( MET_CV50_RelHumidity_percent < 0 ) Then MET_CV50_RelHumidity_percent = 0
+    
+    SatVP(MET_SaturVapPrsTd_kPa,MET_CV50_AirTemperature_degC) 'Lowe, Paul R.: 1977, "An approximating polynomial for computation of saturation vapor pressure," Journal of Applied Meteorology, 16, 100-103
+    MET_SaturVapPrsTd_hPa = MET_SaturVapPrsTd_kPa * 10 'kPa -> hPa
+    DewPoint(MET_CV50_DewPoint_degC,MET_CV50_AirTemperature_degC,MET_CV50_RelHumidity_percent)
+    MET_CV50_VapPressDeficit_hPa = MET_SaturVapPrsTd_hPa - MET_CV50_VapourPressure_hPa 
+    MET_CV50_MixingRatio_gKg = 1000.0 * (SYS_GasConstantAir * MET_CV50_VapourPressure_hPa) / (SYS_GasConstantWater * (MET_CV50_PressureActual_hPa - MET_CV50_VapourPressure_hPa))
+
+    If ( MET_CV50_VapourPressure_hPa > 70 ) Then MET_CV50_VapourPressure_hPa = NaN
+    If ( MET_CV50_VapourPressure_hPa < 0 ) Then MET_CV50_VapourPressure_hPa = NaN
+    If ( MET_CV50_VapPressDeficit_hPa > 50 ) Then MET_CV50_VapPressDeficit_hPa = NaN
+    If ( MET_CV50_VapPressDeficit_hPa < 0 ) Then MET_CV50_VapPressDeficit_hPa = 0
+    If ( MET_CV50_DewPoint_degC < -40 ) Then MET_CV50_DewPoint_degC = NaN
+    If ( MET_CV50_DewPoint_degC > 50 ) Then MET_CV50_DewPoint_degC = NaN
+    If ( MET_CV50_MixingRatio_gKg < 0 ) Then MET_CV50_MixingRatio_gKg = NaN
+    If ( MET_CV50_MixingRatio_gKg > 40 ) Then MET_CV50_MixingRatio_gKg = NaN 
+    
+    If ( MET_CV50_AirTemperature_degC = NaN) Then
+         MET_SaturVapPrsTd_kPa = NaN
+         MET_SaturVapPrsTd_hPa = NaN
+         MET_CV50_VapourPressure_hPa = NaN
+         MET_CV50_VapPressDeficit_hPa = NaN
+         MET_CV50_DewPoint_degC = NaN
+         MET_CV50_MixingRatio_gKg = NaN
+    EndIf 
+        
+    If ( MET_CV50_RelHumidity_percent = NaN) Then
+         MET_CV50_VapourPressure_hPa = NaN
+         MET_CV50_VapPressDeficit_hPa = NaN
+         MET_CV50_DewPoint_degC = NaN
+         MET_CV50_MixingRatio_gKg = NaN
+    EndIf 
+    
+    ' Quality control and secondary entries for solar irradiance
+
+    MET_CV50_GHI_Wm2 = RAW_CV50_GHI_Wm2
+    MET_CV50_WindDirection_deg = (RAW_CV50_WindDirection_deg + SYS_CV50_Azimuth) MOD 360 ' correct for ClimaVUE offset 
+
+		If ( MET_CV50_GHI_Wm2 > 1750 ) Then MET_CV50_GHI_Wm2 = NaN ' more than 1750 W/m2 is outside specs for system
+    If ( MET_CV50_GHI_Wm2 < -20 ) Then MET_CV50_GHI_Wm2 = NaN
+    If ( MET_CV50_GHI_Wm2 < 0 ) Then MET_CV50_GHI_Wm2 = 0
+    
+    ' Quality control and secondary entries for precipitation and lightning
+
+    MET_CV50_Precipitation_mm = RAW_CV50_Precipitation_mm
+		If ( MET_CV50_Precipitation_mm > 1.2 ) Then MET_CV50_Precipitation_mm = NaN ' more than 1.2 mm per 10 seconds is outside specs for system
+    If ( MET_CV50_Precipitation_mm < 0 ) Then MET_CV50_Precipitation_mm = NaN
+    MET_CV50_Precipitation_mm = MET_CV50_Precipitation_mm 
+    
+    MET_CV50_LtngStrikes_cnt = RAW_CV50_LtngStrikes_cnt
+    MET_CV50_LtngDist_km = MET_CV50_LtngDist_km
+    If ( MET_CV50_LtngStrikes_cnt < 0 ) Then MET_CV50_LtngStrikes_cnt = NaN
+    If ( MET_CV50_LtngDist_km < 0 ) Then MET_CV50_LtngDist_km = NaN
+    MET_CV50_LtngStrikes_cnt = MET_CV50_LtngStrikes_cnt 
+     
+    ' Quality control and secondary entries for wind
+
+    MET_CV50_Wind_ms = RAW_CV50_Wind_ms
+    MET_CV50_WindGustMax_ms = RAW_CV50_WindGustMax_ms
+    
+      'High winds with rain can temporarily interfere with sonic wind measurements causing the sensor to output -9999 or -9990. The following instructions set invalid wind measurements
+			'to the previous valid wind measurements. This will 'flat-line' the measurements until the sensor is able to make good readings again. The Invalid_Wind variable will be set to 1 when
+			'a wind measurement is invalid. For troubleshooting purposes, it is highly recommended that you totalize the Invalid_Wind variable in any output tables you define that include
+			'wind speed and/or direction data from the ClimaVUE50.
+			
+			If RAW_CV50_Wind_ms < 0 Then
+				MET_CV50_Wind_ms=MET_CV50_Wind_ms_prev
+				MET_CV50_WindDirection_deg=MET_CV50_WindDirection_deg_prev
+				MET_CV50_WindGustMax_ms=MET_CV50_WindGustMax_ms_prev
+				RAW_CV50_Invalid_Wind=1
+			Else
+				MET_CV50_Wind_ms_prev=RAW_CV50_Wind_ms
+				MET_CV50_WindDirection_deg_prev=MET_CV50_WindDirection_deg
+				MET_CV50_WindGustMax_ms_prev=MET_CV50_WindGustMax_ms
+				RAW_CV50_Invalid_Wind=0
+			EndIf
+
+		If ( MET_CV50_Wind_ms > 30 ) Then MET_CV50_Wind_ms = NaN ' more than 30 m/s is outside specifications of ClimaVue
+    If ( MET_CV50_Wind_ms < 0 ) Then MET_CV50_Wind_ms = NaN
+		If ( MET_CV50_WindGustMax_ms > 30 ) Then MET_CV50_WindGustMax_ms = NaN ' more than 30 m/s is outside specifications of ClimaVue
+    If ( MET_CV50_WindGustMax_ms < 0 ) Then MET_CV50_WindGustMax_ms = NaN
+
+
+    If ( MET_CV50_WindDirection_deg > 360 ) Then MET_CV50_WindDirection_deg = NaN
+    If ( MET_CV50_WindDirection_deg < 0 ) Then MET_CV50_WindDirection_deg = NaN
+    
+ #EndIf  
+ NextScan
+  
+'----------------------------------------------------------------------
+' SLOW SEQUENCE #2
+' Submit latest RAW_20Hz and AGG_1min files to server every 30 minutes
+'----------------------------------------------------------------------
+  
+  SlowSequence
+  Scan (30,Min,0,0)
+    
+    'Create time stamps for file transmission
+     SYS_DateStamp = Left(Public.Timestamp(5,1),10)
+     SYS_TimeStamp = Mid(Public.Timestamp(5,1),12,2) & Mid(Public.Timestamp(5,1),15,2) 
+  
+    'Send 30 min files of raw data
+     SYS_FTPresult(1)=FTPClient (SYS_FTP_ServerIP,SYS_FTP_User,SYS_FTP_Password,"RAW_20Hz","/data/RAW/by-source/ICOS_Cities/"+Status.SerialNumber+"/RAW_20Hz/"+Status.SerialNumber+"_RAW_20Hz_" & SYS_DateStamp & "-" & SYS_TimeStamp & ".csv",2,0,30,Min,-1008)
+     SYS_FTPresult(2)=FTPClient (SYS_FTP_ServerIP,SYS_FTP_User,SYS_FTP_Password,"AGG_1min","/data/RAW/by-source/ICOS_Cities/"+Status.SerialNumber+"/AGG_1min/"+Status.SerialNumber+"_AGG_1min_" & SYS_DateStamp & "-" & SYS_TimeStamp & ".csv",2,0,30,Min,-1008)
+  
+  NextScan
+ 
+EndProg
+
+
+           
+   D        
