@@ -1,7 +1,5 @@
 CR6 Logger Program for IRGASON and REA System. Latest version is Version with highest Version number. Files are named "ICOSCitiesV`XXX`.CR6", where `XXX` is three digit version number.
 
-Version History
-
 V026
 =========
 
