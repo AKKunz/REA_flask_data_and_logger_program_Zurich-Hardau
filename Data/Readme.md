@@ -6,6 +6,10 @@ Column | Units | Description
 REA_ID | - | 
 REA_start | UTC | Date and time
 REA_end | UTC | Date and time
+REA_DeadBandWidth | - | Deadband width
+REA_FreezeWindStatistics | - | If statistics are frozen or a moving average is used.
+REA_Run_SwitchesUp | Count | Number of times the "up" valve is opened/closed
+REA_Run_SwitchesDown | Count | Number of times the "down" valve is opened/closed
 d14C_meas_up | ‰ | 
 d14C_meas_up_err | ‰ |
 d14C_meas_down | ‰ |
@@ -47,3 +51,31 @@ std(CO2)_MGA | ppm |
 std(CO2)_IRGA | ppm |
 Comment | - |
 
+
+## qc_lab.csv
+
+
+Column | Units | Description
+---- | ---- | ---- 
+Test_no  | - | 
+CO2_meas_up  | ppm | 
+CO2_meas_up_err  | ppm | 
+CO2_meas_down  | ppm | 
+CO2_meas_down_err  | ppm |
+
+
+
+## qc_Zurich.csv
+
+Column | Units | Description
+---- | ---- | ----
+Test_no | - | 
+Test_start  | UTC | 
+Test_end  | UTC | 
+CO2_meas_up  | ppm | 
+CO2_meas_up_err  | ppm | 
+CO2_meas_down  | ppm | 
+CO2_meas_down_err  | ppm | 
+CO2_meas_direct  | ppm | 
+CO2_meas_direct_err  | ppm | 
+​
