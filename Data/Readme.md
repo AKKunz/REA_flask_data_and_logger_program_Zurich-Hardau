@@ -1,5 +1,5 @@
 ## REAruns_Zurich
-
+Data on the 103 REA sampling periods that were selected for flask analysis. ΔCO2 was simulated from high-frequency measurements of the MGA and the IRGASON to estimate measurement uncertainties due the sampling process (Sect. 5.2). Flask results are discussed in Sect. 5.3.2 and 6.
 
 Column | Units | Description
 ---- | ---- | ---- 
@@ -53,29 +53,31 @@ Comment | - | Comment on data availability and micrometeorological conditions
 
 
 ## qc_lab.csv
-
+Results of the quality control tests of the REA flask sampling system that were carried out in the ICOS Flask and Calibration Laboratory in Jena to investigate bias or uncertainty due to contamination and memory effects from preceding REA runs. "qc1_1" - "qc1_6" refer to the contamination tests described in Appendix B1, while "qc2_1" - "qc2_6" refer to the memory effect test described in Appendix B2.
 
 Column | Units | Description
 ---- | ---- | ---- 
-Test_no  | - | 
-CO2_meas_up  | ppm | 
-CO2_meas_up_err  | ppm | 
-CO2_meas_down  | ppm | 
-CO2_meas_down_err  | ppm |
+Test_no  | - | Test number 
+CO2_meas_up  | ppm | CO2 measured in the "up" flask at the GC
+CO2_meas_up_err  | ppm | CO2 uncertainty measured in the "up" flask at the GC
+CO2_meas_down  | ppm | CO2 measured in the "down" flask at the GC
+CO2_meas_down_err  | ppm | CO2 uncertainty measured in the "down" flask at the GC
 
 
 
 ## qc_Zurich.csv
+Results of the "all-valves-open tests" performed during the Zurich campaign to check for biases between updraft and downdraft sampling, as well as for leaks or other sources of contamination. Details are described in Sect. 5.3.1.
+
 
 Column | Units | Description
 ---- | ---- | ----
-Test_no | - | 
-Test_start  | UTC | 
-Test_end  | UTC | 
-CO2_meas_up  | ppm | 
-CO2_meas_up_err  | ppm | 
-CO2_meas_down  | ppm | 
-CO2_meas_down_err  | ppm | 
-CO2_meas_direct  | ppm | 
-CO2_meas_direct_err  | ppm | 
+Test_no | - | Test number
+Test_start  | UTC | Start of the all-valves-open test
+Test_end  | UTC | End of the all-valves-open test
+CO2_meas_up  | ppm | CO2 measured in the "up" flask at the GC
+CO2_meas_up_err  | ppm | CO2 uncertainty measured in the "up" flask at the GC
+CO2_meas_down  | ppm | CO2 measured in the "down" flask at the GC
+CO2_meas_down_err  | ppm | CO2 uncertainty measured in the "down" flask at the GC
+CO2_meas_direct  | ppm | CO2 measured in the "direct" flask at the GC
+CO2_meas_direct_err  | ppm | CO2 uncertainty measured in the "up" flask at the GC
 ​
