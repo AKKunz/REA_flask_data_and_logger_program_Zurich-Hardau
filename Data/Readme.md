@@ -3,26 +3,26 @@
 
 Column | Units | Description
 ---- | ---- | ---- 
-REA_ID | - | 
+REA_ID | - | Unique, consecutively assigned number for each REA run
 REA_start | UTC | Date and time
 REA_end | UTC | Date and time
 REA_DeadBandWidth | - | Deadband width
-REA_FreezeWindStatistics | - | If statistics are frozen or a moving average is used.
+REA_FreezeWindStatistics | - | If statistics are frozen or a moving average is used
 REA_Run_SwitchesUp | Count | Number of times the "up" valve is opened/closed
 REA_Run_SwitchesDown | Count | Number of times the "down" valve is opened/closed
-d14C_meas_up | ‰ | 
-d14C_meas_up_err | ‰ |
-d14C_meas_down | ‰ |
-d14C_meas_down_err | ‰ |
-CO2_meas_up | ppm |
-CO2_meas_up_err | ppm |
-CO2_meas_down | ppm |
-CO2_meas_down_err | ppm |
-DCO2_meas | ppm |
-DCO2_meas_err | ppm |
-DCO2_MGA | ppm |
-DCO2_IRGA | ppm |
-DCO2_lag100ms_MGA | ppm |
+d14C_meas_up | ‰ | Δ14C of updraft flask sample measured by AMS
+d14C_meas_up_err | ‰ | Δ14C uncertainty of updraft flask sample measured by AMS
+d14C_meas_down | ‰ | Δ14C of downdraft flask sample measured by AMS
+d14C_meas_down_err | ‰ | Δ14C uncertainty of downdraft flask sample measured by AMS
+CO2_meas_up | ppm | CO2 of updraft flask sample measured by GC
+CO2_meas_up_err | ppm | CO2 uncertainty of updraft flask sample measured by GC
+CO2_meas_down | ppm | CO2 of downdraft flask sample measured by GC
+CO2_meas_down_err | ppm | CO2 uncertainty of downdraft flask sample measured by GC
+DCO2_meas | ppm | CO2 difference between up- and downdraft flask samples measured by GC
+DCO2_meas_err | ppm | Uncertainty of CO2 difference between up- and downdraft flask samples measured by GC
+DCO2_MGA | ppm | CO2 difference between up- and downdraft samples estimated from high-frequency measurements of the MGA
+DCO2_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from high-frequency measurements of the IRGASON
+DCO2_lag100ms_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements with 100 ms time lag between wind signal and CO2
 DCO2_lag100ms_IRGA | ppm |
 DCO2_lag200ms_MGA | ppm |
 DCO2_lag200ms_IRGA | ppm |
