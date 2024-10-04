@@ -80,4 +80,3 @@ CO2_meas_down  | ppm | CO2 measured in the "down" flask at the GC
 CO2_meas_down_err  | ppm | CO2 uncertainty measured in the "down" flask at the GC
 CO2_meas_direct  | ppm | CO2 measured in the "direct" flask at the GC
 CO2_meas_direct_err  | ppm | CO2 uncertainty measured in the "up" flask at the GC
-​
