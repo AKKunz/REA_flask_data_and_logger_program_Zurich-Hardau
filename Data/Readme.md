@@ -4,46 +4,46 @@
 Column | Units | Description
 ---- | ---- | ---- 
 REA_ID | - | 
-REA_start_UTC | UTC | Date and time
-REA_end_UTC | UTC | Date and time
-d14C_meas_up_ppm | | 
-d14C_meas_up_err_ppm | |
-d14C_meas_down_ppm | |
-d14C_meas_down_err_ppm | |
-CO2_meas_up_ppm | |
-CO2_meas_up_err_ppm | |
-CO2_meas_down_ppm | |
-CO2_meas_down_err_ppm | |
-DCO2_meas_ppm | |
-DCO2_meas_err_ppm | |
-DCO2_MGA_ppm | |
-DCO2_IRGA_ppm | |
-DCO2_lag100ms_MGA_ppm | |
-DCO2_lag100ms_IRGA_ppm | |
-DCO2_lag200ms_MGA_ppm | |
-DCO2_lag200ms_IRGA_ppm | |
-DCO2_lag300ms_MGA_ppm | |
-DCO2_lag300ms_IRGA_ppm | |
-DCO2_lag400ms_MGA_ppm | |
-DCO2_lag400ms_IRGA_ppm | |
-DCO2_lag500ms_MGA_ppm | |
-DCO2_lag500ms_IRGA_ppm | |
-DCO2_lag600ms_MGA_ppm | |
-DCO2_lag600ms_IRGA_ppm | |
-DCO2_lag700ms_MGA_ppm | |
-DCO2_lag700ms_IRGA_ppm | |
-DCO2_lag800ms_MGA_ppm | |
-DCO2_lag800ms_IRGA_ppm | |
-DCO2_dtrinse-4s_MGA_ppm | |
-DCO2_dtrinse-4s_IRGA_ppm | |
-DCO2_dtrinse-2s_MGA_ppm | |
-DCO2_dtrinse-2s_IRGA_ppm | |
-DCO2_dtrinse2s_MGA_ppm | |
-DCO2_dtrinse2s_IRGA_ppm | |
-DCO2_dtrinse4s_MGA_ppm | |
-DCO2_dtrinse4s_IRGA_ppm | |
-std(DCO2_var103)_ppm | |
-std(CO2)_MGA_ppm | |
-std(CO2)_IRGA_ppm | |
-Comment | |
+REA_start | UTC | Date and time
+REA_end | UTC | Date and time
+d14C_meas_up | ‰ | 
+d14C_meas_up_err | ‰ |
+d14C_meas_down | ‰ |
+d14C_meas_down_err | ‰ |
+CO2_meas_up | ppm |
+CO2_meas_up_err | ppm |
+CO2_meas_down | ppm |
+CO2_meas_down_err | ppm |
+DCO2_meas | ppm |
+DCO2_meas_err | ppm |
+DCO2_MGA | ppm |
+DCO2_IRGA | ppm |
+DCO2_lag100ms_MGA | ppm |
+DCO2_lag100ms_IRGA | ppm |
+DCO2_lag200ms_MGA | ppm |
+DCO2_lag200ms_IRGA | ppm |
+DCO2_lag300ms_MGA | ppm |
+DCO2_lag300ms_IRGA | ppm |
+DCO2_lag400ms_MGA | ppm |
+DCO2_lag400ms_IRGA | ppm |
+DCO2_lag500ms_MGA | ppm |
+DCO2_lag500ms_IRGA | ppm |
+DCO2_lag600ms_MGA | ppm |
+DCO2_lag600ms_IRGA | ppm |
+DCO2_lag700ms_MGA | ppm |
+DCO2_lag700ms_IRGA | ppm |
+DCO2_lag800ms_MGA | ppm |
+DCO2_lag800ms_IRGA | ppm |
+DCO2_dtrinse-4s_MGA | ppm |
+DCO2_dtrinse-4s_IRGA | ppm |
+DCO2_dtrinse-2s_MGA | ppm |
+DCO2_dtrinse-2s_IRGA | ppm |
+DCO2_dtrinse2s_MGA | ppm |
+DCO2_dtrinse2s_IRGA | ppm |
+DCO2_dtrinse4s_MGA | ppm |
+DCO2_dtrinse4s_IRGA | ppm |
+std(DCO2_var103) | ppm |
+std(CO2)_MGA | ppm |
+std(CO2)_IRGA | ppm |
+Comment | - |
 
