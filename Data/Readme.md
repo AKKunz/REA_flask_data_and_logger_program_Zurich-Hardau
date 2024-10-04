@@ -4,8 +4,8 @@
 Column | Units | Description
 ---- | ---- | ---- 
 REA_ID | - | Unique, consecutively assigned number for each REA run
-REA_start | UTC | Date and time
-REA_end | UTC | Date and time
+REA_start | UTC | Date and time of REA run start, synchronized to IRGASON measurements
+REA_end | UTC | Date and time of REA run end, synchronized to IRGASON measurements
 REA_DeadBandWidth | - | Deadband width
 REA_FreezeWindStatistics | - | If statistics are frozen or a moving average is used
 REA_Run_SwitchesUp | Count | Number of times the "up" valve is opened/closed
@@ -23,33 +23,33 @@ DCO2_meas_err | ppm | Uncertainty of CO2 difference between up- and downdraft fl
 DCO2_MGA | ppm | CO2 difference between up- and downdraft samples estimated from high-frequency measurements of the MGA
 DCO2_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from high-frequency measurements of the IRGASON
 DCO2_lag100ms_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements with 100 ms time lag between wind signal and CO2
-DCO2_lag100ms_IRGA | ppm |
-DCO2_lag200ms_MGA | ppm |
-DCO2_lag200ms_IRGA | ppm |
-DCO2_lag300ms_MGA | ppm |
-DCO2_lag300ms_IRGA | ppm |
-DCO2_lag400ms_MGA | ppm |
-DCO2_lag400ms_IRGA | ppm |
-DCO2_lag500ms_MGA | ppm |
-DCO2_lag500ms_IRGA | ppm |
-DCO2_lag600ms_MGA | ppm |
-DCO2_lag600ms_IRGA | ppm |
-DCO2_lag700ms_MGA | ppm |
-DCO2_lag700ms_IRGA | ppm |
-DCO2_lag800ms_MGA | ppm |
-DCO2_lag800ms_IRGA | ppm |
-DCO2_dtrinse-4s_MGA | ppm |
-DCO2_dtrinse-4s_IRGA | ppm |
-DCO2_dtrinse-2s_MGA | ppm |
-DCO2_dtrinse-2s_IRGA | ppm |
-DCO2_dtrinse2s_MGA | ppm |
-DCO2_dtrinse2s_IRGA | ppm |
-DCO2_dtrinse4s_MGA | ppm |
-DCO2_dtrinse4s_IRGA | ppm |
-std(DCO2_var103) | ppm |
-std(CO2)_MGA | ppm |
-std(CO2)_IRGA | ppm |
-Comment | - |
+DCO2_lag100ms_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements with 100 ms time lag between wind signal and CO2
+DCO2_lag200ms_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements with 200 ms time lag between wind signal and CO2
+DCO2_lag200ms_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements with 200 ms time lag between wind signal and CO2
+DCO2_lag300ms_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements with 300 ms time lag between wind signal and CO2
+DCO2_lag300ms_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements with 300 ms time lag between wind signal and CO2
+DCO2_lag400ms_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements with 400 ms time lag between wind signal and CO2
+DCO2_lag400ms_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements with 400 ms time lag between wind signal and CO2
+DCO2_lag500ms_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements with 500 ms time lag between wind signal and CO2
+DCO2_lag500ms_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements with 500 ms time lag between wind signal and CO2
+DCO2_lag600ms_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements with 600 ms time lag between wind signal and CO2
+DCO2_lag600ms_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements with 600 ms time lag between wind signal and CO2
+DCO2_lag700ms_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements with 700 ms time lag between wind signal and CO2
+DCO2_lag700ms_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements with 700 ms time lag between wind signal and CO2
+DCO2_lag800ms_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements with 800 ms time lag between wind signal and CO2
+DCO2_lag800ms_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements with 800 ms time lag between wind signal and CO2
+DCO2_dtrinse-4s_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements when the rinse time is 4 s too short
+DCO2_dtrinse-4s_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements when the rinse time is 4 s too short
+DCO2_dtrinse-2s_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements when the rinse time is 2 s too short
+DCO2_dtrinse-2s_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements when the rinse time is 2 s too short
+DCO2_dtrinse2s_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements when the rinse time is 2 s too long
+DCO2_dtrinse2s_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements when the rinse time is 2 s too long
+DCO2_dtrinse4s_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements when the rinse time is 4 s too long
+DCO2_dtrinse4s_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements when the rinse time is 4 s too long
+std(DCO2_var103) | ppm | Standard deviation of 103 ΔCO2 estimates obtained from high-frequency measurements of the MGA or, if not available, the IRGASON, with varying weights of the measurements
+std(CO2)_MGA | ppm | Standard deviation of CO2 measured by the MGA during the REA run
+std(CO2)_IRGA | ppm | Standard deviation of CO2 measured by the IRGASON during the REA run
+Comment | - | Comment on data availability and micrometeorological conditions
 
 
 ## qc_lab.csv
