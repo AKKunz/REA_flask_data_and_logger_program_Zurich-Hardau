@@ -4,16 +4,19 @@ V026
 =========
 
 - Online calculation of the dry mole fraction by @joshhashemi
+- In use: 14 July 2022, 16:07 - 20 July 2022, 06:30 in Zurich, Hardau
 
 V027
 =========
 
 - Introduces a new public variable for `SYS_REA_Sampler_Voltage_Threshold`. If voltage monitored at Channel U7/U8 was in the previous scan loop (50 ms) above the value set in `SYS_REA_Sampler_Voltage_Threshold` in mV and drops in the current loop below the value of `SYS_REA_Sampler_Voltage_Threshold` then `REA_Active` is set to `0`. This should happen if one of the reservoirs of the sampler is full. The run is ended, all valves are closed and run statistics are written. During start-up, when the voltage monitored at Channel U7/U8 is below `SYS_REA_Sampler_Voltage_Threshold` and also was below in the previous loop (50 ms) - nothing happens, this is the time the sampler is not yet ready yet, as denoted in the flags. New default value is 1500.
+- In use: 20 July 2022, 07:00 - 21 July 2022, 13:00 in Zurich, Hardau
 
 V028
 =========
 
 - Added dry mole fraction to `RAW_20Hz` output table.
+- In use: 21 July 2022, 14:00 - 11 August 2022, 10:00 in Zurich, Hardau
 
 V029
 =========
@@ -21,6 +24,7 @@ V029
 - Changed functionality of REA sampler triggering. Instead of user setting `Rea_Active` = 1 the program watches voltage at Channel U7/U8 and if Voltage goes from around zero to over 1.5 V the run is started.
 - Added wind direction and horizontal wind speed to `REA_RunSummary` table
 - Added "All" averages of measurements to `REA_RunSummary` table (i.e., average of measurement over entire REA run - "up" + "down" + deadband)
+- In use: 11 August 2022, 10:20 - 20 October 2022, 14:30 in Zurich, Hardau
 
 V030
 =========
@@ -35,6 +39,7 @@ V031
 - Mainenance of Valves: Added a regular maintenance valve opening and closures twice a day, for one second open, fixed at 01:00 and 13:00 UTC. The maintenance valve opening and closures will not be communicated to the sampler and they will not trigger a run. They just happen and are written with code `9` into the REA flag. Maintenance valve opening and closures will not happen if an active run is ongoing (no need).
 - Added an option to have a runniung mean for w and sigma w during any REA run. Up to version V30, within a REA run, the mean vertical wind (Uz) and the standard deviation of vertical wind (Sigma Uz) were frozen (=kept constant) at the beginning of the run, based on the statistics during the 30 minutes preceeding the run. Now, you can choose to keep this behaviour by setting `REA_FreezeWindStatistics = 1`, or, you can also opt to set `REA_FreezeWindStatistics=0` and the mean vertical wind and the standard deviation of vertical wind will continue to be adjusted during the run based on their moving average (The length of the moving average is set by `SYS_MovingBlockDuration = 1800`. By default it is 30 minutes).
 - Run summary files are uploaded by FTP to the server after each REA run. The file name is created based on the end date / time of the run. Each file will have one run included.
+- In use: 20 August 14:33 -    in Zurich, Hardau 
 
 V032
 =========
@@ -42,6 +47,7 @@ V032
 - Adding a delay of 2 min prior to gziping and sending files since writing data in memory takes ~1:45 min
 - gziping the 30 min files
 - sending the zipped files to the server
+- 
 
 V034
 =========
@@ -63,9 +69,12 @@ V038
 
 The run summary outputs have been changed as follows: Added a variable `REA_Hyperbolic` that is either 0 (no HREA, classical mode) or 1 (HREA mode). Added variables `AGG_IRGASON_CO2Dry_RunAvg` and `AGG_IRGASON_CO2Dry_Stddev`, but note they make only sense if `REA_FreezeStatistics` is set to 1.
 
+- In use: 
+
 V039
 ========= 
 
  - The `EC100()` command was modified to use trigger method 2, which uses humidity-correcetd 20 Hz sonic temperature to calculate CO2 density.
  - An additional variable was added to data tables due to the above, namely `RAW_IRGASON_CO2Dry_FastResp`
  - The calculation of variable `RAW_IRGASON_CO2Dry` was modified to use this new fast response density, which is needed for accurate control of the hyperbolic deadband.
+ - In use: 13 June 2024, 09:20 - to date in Munich, Blutenburgstraße
