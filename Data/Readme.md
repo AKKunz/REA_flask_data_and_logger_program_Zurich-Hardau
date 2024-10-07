@@ -46,7 +46,8 @@ DCO2_dtrinse2s_MGA | ppm | CO2 difference between up- and downdraft samples esti
 DCO2_dtrinse2s_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements when the rinse time is 2 s too long
 DCO2_dtrinse4s_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements when the rinse time is 4 s too long
 DCO2_dtrinse4s_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements when the rinse time is 4 s too long
-std(DCO2_var103) | ppm | Standard deviation of 103 ΔCO2 estimates obtained from high-frequency measurements of the MGA or, if not available, the IRGASON, with varying weights of the measurements
+DCO2_flowID_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements when weighting the 20 Hz data according to observed flow variability at REA run "ID"
+DCO2_flowID_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements when weighting the 20 Hz data according to observed flow variability at REA run "ID"
 std(CO2)_MGA | ppm | Standard deviation of CO2 measured by the MGA during the REA run
 std(CO2)_IRGA | ppm | Standard deviation of CO2 measured by the IRGASON during the REA run
 Comment | - | Comment on data availability and micrometeorological conditions
