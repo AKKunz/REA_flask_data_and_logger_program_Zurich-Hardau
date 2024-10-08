@@ -1,6 +1,6 @@
 # Relaxed eddy accumulation (REA) for 14CO2: Data and logger program
 
-This repository supports the manuscript "A relaxed eddy accumulation flask sampling system for 14C-based partitioning of fossil and non-fossil CO2 fluxes". It contains the following files:
+This repository supports the manuscript "A relaxed eddy accumulation flask sampling system for 14C-based partitioning of fossil and non-fossil CO2 fluxes". It contains:
 
 - 'Logger-Program':
   - Documentation of the CR6 logger program
