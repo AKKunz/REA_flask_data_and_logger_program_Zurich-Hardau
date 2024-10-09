@@ -18,10 +18,10 @@
 '=====================================================================
 
 'Define internet communication settings
-'Const SYS_NTP_Server_IP = "192.168.1.1" 'NTP from router
-Const SYS_FTP_ServerIP = "132.230.103.24"  'FTP at Univeristy of Freiburg for data transmission
-Const SYS_FTP_User = "datagate7"           
-Const SYS_FTP_Password = "handsaw-talon-movable-haziness-unleash-buckle"
+'Const SYS_NTP_Server_IP =  'NTP from router
+Const SYS_FTP_ServerIP =   'FTP at Univeristy of Freiburg for data transmission
+Const SYS_FTP_User =            
+Const SYS_FTP_Password =
 'Const SYS_Offset_from_UTC = 0
 
 'Define SDM and SDI-12 communication settings
