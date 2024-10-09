@@ -42,21 +42,31 @@ V031
 - In use for REA sampling in Zurich, Hardau: 20 August 2022, 14:33 - 30 March 2023  
           
 
-V032
+V032.INRAE
 =========
 
 - Adding a delay of 2 min prior to gziping and sending files since writing data in memory takes ~1:45 min
 - gziping the 30 min files
 - sending the zipped files to the server
 
-V033.INRAE
+V033.INRAE.MPI
 ========= 
-- In use for REA sampling in Paris, Romainville: 08 July 2023 - 
+- Adaptations to Romainville site and zipping of files
+- In use for REA sampling in Paris, Romainville: 05 July 2023 - 10 July 2023, 09:00
 
-V034
+V034.INRAE.MPI
 =========
 
  - Add a force reset of REA_PreviousReservoir to 0 during the X seconds flush after runs. Under the previous logic if one cycled Manual_OpenValves on/off twice without an actual REA sample inbetween the codeblock controlling the valves would never execute, causing some of the confusing ROV behaviours.
+ - In use for REA sampling in Paris, Romainville: 10 July 2023, 10:00 - 
+
+V035.INRAE.MPI
+=========
+ - In use for REA sampling in Paris, Romainville
+
+V036.INRAE.MPI
+=========
+ - In use for REA sampling in Paris, Romainville
 
 V038
 =========
@@ -73,7 +83,7 @@ V038
 
 The run summary outputs have been changed as follows: Added a variable `REA_Hyperbolic` that is either 0 (no HREA, classical mode) or 1 (HREA mode). Added variables `AGG_IRGASON_CO2Dry_RunAvg` and `AGG_IRGASON_CO2Dry_Stddev`, but note they make only sense if `REA_FreezeStatistics` is set to 1.
 
-- In use in Munich, Blutenburgstraße: 
+- In use for REA sampling in Munich, Blutenburgstraße: 
 
 V039
 ========= 
@@ -81,4 +91,8 @@ V039
  - The `EC100()` command was modified to use trigger method 2, which uses humidity-correcetd 20 Hz sonic temperature to calculate CO2 density.
  - An additional variable was added to data tables due to the above, namely `RAW_IRGASON_CO2Dry_FastResp`
  - The calculation of variable `RAW_IRGASON_CO2Dry` was modified to use this new fast response density, which is needed for accurate control of the hyperbolic deadband.
- - In use in Munich, Blutenburgstraße: since 13 June 2024, 09:20 
+ - In use for REA sampling in Munich, Blutenburgstraße: since 13 June 2024, 09:20
+
+V039_Munich
+========= 
+
