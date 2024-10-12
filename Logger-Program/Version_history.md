@@ -62,11 +62,11 @@ V034.INRAE.MPI
 
 V035.INRAE.MPI
 =========
- - In use for REA sampling in Paris, Romainville: 07 September 2023, 11:30 - 
+ - In use for REA sampling in Paris, Romainville: 07 September 2023, 11:30 - 20 February 2023, 10:00
 
 V036.INRAE.MPI
 =========
- - In use for REA sampling in Paris, Romainville:  - 26 March 2024, 10:30
+ - In use for REA sampling in Paris, Romainville: 20 February 2023, 10:00 - 26 March 2024, 10:30
 
 V038
 =========
@@ -83,7 +83,6 @@ V038
 
 The run summary outputs have been changed as follows: Added a variable `REA_Hyperbolic` that is either 0 (no HREA, classical mode) or 1 (HREA mode). Added variables `AGG_IRGASON_CO2Dry_RunAvg` and `AGG_IRGASON_CO2Dry_Stddev`, but note they make only sense if `REA_FreezeStatistics` is set to 1.
 
-- In use for REA sampling in Munich, Blutenburgstraße: 26 March 2024, 11:00 - 13 April 2024, 09:30
 
 V039
 ========= 
@@ -91,8 +90,8 @@ V039
  - The `EC100()` command was modified to use trigger method 2, which uses humidity-correcetd 20 Hz sonic temperature to calculate CO2 density.
  - An additional variable was added to data tables due to the above, namely `RAW_IRGASON_CO2Dry_FastResp`
  - The calculation of variable `RAW_IRGASON_CO2Dry` was modified to use this new fast response density, which is needed for accurate control of the hyperbolic deadband.
- - In use for REA sampling in Munich, Blutenburgstraße: 13 April 2024, 09:30 - 13 June 2024, 09:20
 
 V039_Munich
 ========= 
-- In use for REA sampling in Munich, Blutenburgstraße: since 13 June 2024, 09:20
+- REA settings adapted to Munich setup
+- In use for REA sampling in Munich, Blutenburgstraße:  since 1 July 2024
