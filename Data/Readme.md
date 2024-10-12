@@ -1,5 +1,5 @@
 ## REAruns_Zurich
-Data on the 103 REA sampling periods that were selected for flask analysis. ΔCO2 was simulated from high-frequency measurements of the MGA and the IRGASON to estimate measurement uncertainties due the sampling process (Sect. 5.2). Flask results are discussed in Sect. 5.3.2 and 6.
+Data of the 103 REA sampling periods that were selected for flask analysis from the tall-tower in Zurich, Switzerland. CO2 concentration differences between updraft and downdraft samples were simulated from high-frequency measurements of a multicompound (MGA$^7$) closed-path gas analyzer (MIRO Analytical AG, Wallisellen, Switzerland) and an open-path infrared gas analyzer and 3D ultrasonic anemometer (IRGASON, Campbell Scientific, Inc., Logan, UT, USA) to estimate measurement uncertainties due the sampling process (Sect. 5.2). Flask results are discussed in Sect. 5.3.2 and 6.
 
 Column | Units | Description
 ---- | ---- | ---- 
@@ -10,6 +10,9 @@ REA_DeadBandWidth | - | Deadband width
 REA_FreezeWindStatistics | - | If statistics are frozen or a moving average is used
 REA_Run_SwitchesUp | Count | Number of times the "up" valve is opened/closed
 REA_Run_SwitchesDown | Count | Number of times the "down" valve is opened/closed
+Comment | - | Comment on data availability and micrometeorological conditions
+std(CO2)_MGA | ppm | Standard deviation of CO2 measured by the MGA during the REA run
+std(CO2)_IRGA | ppm | Standard deviation of CO2 measured by the IRGASON during the REA run
 d14C_meas_up | ‰ | Δ14C of updraft flask sample measured by AMS
 d14C_meas_up_err | ‰ | Δ14C uncertainty of updraft flask sample measured by AMS
 d14C_meas_down | ‰ | Δ14C of downdraft flask sample measured by AMS
@@ -46,11 +49,8 @@ DCO2_dtrinse2s_MGA | ppm | CO2 difference between up- and downdraft samples esti
 DCO2_dtrinse2s_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements when the rinse time is 2 s too long
 DCO2_dtrinse4s_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements when the rinse time is 4 s too long
 DCO2_dtrinse4s_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements when the rinse time is 4 s too long
-DCO2_flowID_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements when weighting the 20 Hz data according to observed flow variability at REA run "ID"
-DCO2_flowID_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements when weighting the 20 Hz data according to observed flow variability at REA run "ID"
-std(CO2)_MGA | ppm | Standard deviation of CO2 measured by the MGA during the REA run
-std(CO2)_IRGA | ppm | Standard deviation of CO2 measured by the IRGASON during the REA run
-Comment | - | Comment on data availability and micrometeorological conditions
+DCO2_flow'REA_ID'_MGA | ppm | CO2 difference between up- and downdraft samples estimated from MGA measurements when weighting the 20 Hz data according to observed flow variability from all 103 REA runs ('REA_ID' refers to the REA run from which the MFC measurements were used as a weighting function) 
+DCO2_flow'REA_ID'_IRGA | ppm | CO2 difference between up- and downdraft samples estimated from IRGASON measurements when weighting the 20 Hz data according to observed flow variability from all 103 REA runs ('REA_ID' refers to the REA run from which the MFC measurements were used as a weighting function)
 
 
 ## qc_lab.csv
