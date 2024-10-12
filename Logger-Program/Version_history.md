@@ -1,9 +1,9 @@
-CR6 Logger Program for IRGASON and REA System. Latest version is Version with highest Version number. Files are named "ICOSCitiesV`XXX`.CR6", where `XXX` is three digit version number.
+CR6 Logger Program for IRGASON and REA System. The latest version is the version with the highest version number. Files are named "ICOSCitiesV`XXX`.CR6", where `XXX` is the three digit version number.
 
 V026
 =========
 
-- Online calculation of the dry mole fraction by @joshhashemi
+- Online calculation of the dry mole fraction by Josh Hashemi
 - In use for REA sampling in Zurich, Hardau: 14 July 2022, 16:07 - 20 July 2022, 06:30 
 
 V027
