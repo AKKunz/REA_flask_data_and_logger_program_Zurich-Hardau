@@ -2,7 +2,7 @@
 
 This repository supports the manuscript "A relaxed eddy accumulation flask sampling system for <sup>14</sup>C-based partitioning of fossil and non-fossil CO<sub>2</sub> fluxes". It contains:
 
-- 'Logger-Program':
+- [Logger-Program](https://github.com/AKKunz/REA_flask_data_and_logger_program_Zurich-Hardau/tree/main/Logger-Program):
   - Documentation of the CR6 logger program
   - All program versions used to collect REA flasks since July 2022 (at three different sites: 1) Hardau, Zurich, Switzerland; 2) Romainville, Paris, France; 3) Blutenburgstraße, Munich, Germany)
 - 'Data':
