@@ -1,5 +1,5 @@
 ## REAruns_Zurich
-Data of the 103 REA sampling periods that were selected for flask analysis from the tall-tower in Zurich, Switzerland. CO2 concentration differences between updraft and downdraft samples were simulated from high-frequency measurements of a multicompound (MGA7) closed-path gas analyzer (MIRO Analytical AG, Wallisellen, Switzerland) and an open-path infrared gas analyzer and 3D ultrasonic anemometer (IRGASON, Campbell Scientific, Inc., Logan, UT, USA) to estimate measurement uncertainties due the sampling process (Sect. 5.2). Flask results are discussed in Sect. 5.3.2 and 6.
+Data of the 103 REA sampling periods that were selected for flask analysis from the tall-tower in Zurich, Switzerland. CO<sub>2</sub> concentration differences between updraft and downdraft samples were simulated from high-frequency measurements of a multicompound (MGA7) closed-path gas analyzer (MIRO Analytical AG, Wallisellen, Switzerland) and an open-path infrared gas analyzer and 3D ultrasonic anemometer (IRGASON, Campbell Scientific, Inc., Logan, UT, USA) to estimate measurement uncertainties due the sampling process (Sect. 5.2). Flask results are discussed in Sect. 5.3.2 and 6.
 
 Column | Units | Description
 ---- | ---- | ---- 
